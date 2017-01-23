@@ -81,6 +81,14 @@ def _parse_args():
                         help='identity_file',
                         nargs='?',
                         default='')
+    parser.add_argument('-n', '--no-headers',
+                        action='store_true',
+                        default=False,
+                        help="Don't display headers")
+    parser.add_argument('-s', '--skip-errors',
+                        action='store_true',
+                        default=False,
+                        help="Skip Errors")
     parser.add_argument('--debug',
                         action='store_true',
                         default=False,
@@ -230,14 +238,21 @@ def process_host(host_name, ssh_identity_file, jenkins_cli_command):
     print(response)
 
 
-def process_hosts(hosts, jenkins_cli_command, ssh_identity_file):
+def process_hosts(hosts, jenkins_cli_command, ssh_identity_file, display_headers=True, skip_errors=False):
     for host in hosts:
         host_name = host.get_name()
-        print('=' * 80)
-        print(host_name)
-        print('-' * 80)
 
-        process_host(host_name, ssh_identity_file, jenkins_cli_command)
+        if display_headers:
+            print('=' * 80)
+            print(host_name)
+            print('-' * 80)
+
+        try:
+            process_host(host_name, ssh_identity_file, jenkins_cli_command)
+        except Exception, e:
+            print "{0}".format(str(e))
+            if not skip_errors:
+                raise
 
 
 def main():
@@ -245,8 +260,11 @@ def main():
     args = _parse_args()
 
     hosts = get_ansible_hosts(args.inventory_file, args.pattern)
-    display_hosts(hosts)
-    process_hosts(hosts, args.command, args.identity_file)
+
+    if not args.no_headers:
+        display_hosts(hosts)
+
+    process_hosts(hosts, args.command, args.identity_file, not args.no_headers, args.skip_errors)
 
 
 if __name__ == "__main__":
