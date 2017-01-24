@@ -59,15 +59,15 @@ brew install homebrew/dupes/expect
 ## Run
 
 ~~~
-./jenkins-info.py ansible_hosts
+./jenkins.py ansible_hosts
 
-./jenkins-info.py ansible_hosts version --pattern jenkins-server
+./jenkins.py ansible_hosts version --pattern jenkins-server
 ~~~
 
 ## Run, SSH key
 
 ~~~
-./jenkins-info.py ansible_hosts version --pattern localhost --debug -i jenkins-admin
+./jenkins.py ansible_hosts version --pattern localhost --debug -i jenkins-admin
 ~~~
 
 > With ```--debug``` passwords will be displayed in stdout
@@ -75,19 +75,19 @@ brew install homebrew/dupes/expect
 ## Run, groovy script
 
 ~~~
-./jenkins-info.py ansible_hosts 'groovy ./groovy/get-node-details.groovy' --pattern localhost --debug -i jenkins-admin
+./jenkins.py ansible_hosts 'groovy ./groovy/get-node-details.groovy' --pattern localhost --debug -i jenkins-admin
 ~~~
 
 ## Run, log
 
 ~~~
-unbuffer ./jenkins-info.py ansible_hosts --pattern jenkins-server | tee jenkins-info.log
+unbuffer ./jenkins.py ansible_hosts --pattern jenkins-server | tee jenkins.log
 ~~~
 
 ## Debug
 
 ~~~
-./jenkins-info.py ansible_hosts --pattern jenkins-server --debug
+./jenkins.py ansible_hosts --pattern jenkins-server --debug
 ~~~
 
 > With ```--debug``` passwords will be displayed in stdout
@@ -95,7 +95,7 @@ unbuffer ./jenkins-info.py ansible_hosts --pattern jenkins-server | tee jenkins-
 ## Debug, pdb
 
 ~~~
-python -m pdb jenkins-info.py ansible_hosts --pattern jenkins-server
+python -m pdb jenkins.py ansible_hosts --pattern jenkins-server
 ~~~
 
 ## Debugging, pudb
@@ -103,5 +103,5 @@ python -m pdb jenkins-info.py ansible_hosts --pattern jenkins-server
 ~~~
 pip install pudb
 
-pudb jenkins-info.py ansible_hosts --pattern jenkins-server
+pudb jenkins.py ansible_hosts --pattern jenkins-server
 ~~~

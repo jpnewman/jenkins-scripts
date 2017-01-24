@@ -15,8 +15,8 @@ for (slave in Jenkins.instance.slaves) {
     addr = ''
   }
   if (addr) {
-	  println "  ${slave.name} ${addr.hostAddress} (${slave.computer.offline})"
+    println "  ${slave.name} ${addr.hostAddress} (${slave.computer.offline})"
   } else {
-	  println "  ${slave.name} (${slave.computer.offline})"
+    println "  ${slave.name} (${slave.computer.offline})"
   }
 }
