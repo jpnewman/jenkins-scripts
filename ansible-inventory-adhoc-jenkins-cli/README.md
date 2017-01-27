@@ -78,6 +78,37 @@ brew install homebrew/dupes/expect
 ./jenkins.py ansible_hosts 'groovy ./groovy/get-node-details.groovy' --pattern localhost --debug -i jenkins-admin
 ~~~
 
+#### Run, groovy script (get-node-details.groovy)
+
+~~~
+unbuffer ./jenkins.py ../ansible_hosts 'groovy ../spec/groovy/get-node-details.groovy' -i ~/.ssh/builduser --pattern gs-jenkins | tee jenkins.log
+~~~
+
+#### Run, groovy script (get-jobs-details.groovy)
+
+~~~
+unbuffer ./jenkins.py ../ansible_hosts 'groovy ../spec/groovy/get-jobs-details.groovy' -i ~/.ssh/builduser --pattern gs-jenkins | tee jenkins-jobs.log
+~~~
+
+#### Run, groovy script (jenkins-ci-report.groovy)
+
+~~~
+unbuffer ./jenkins.py ../ansible_hosts 'groovy ../spec/groovy/jenkins-ci-report.groovy' -i ~/.ssh/builduser --pattern aws-jenkins,gs-jenkins --no-headers --skip-errors --prefix-file jenkins-ci-report_header.txt | tee jenkins-ci-report.md
+~~~
+
+#### Run, without headers
+
+~~~
+unbuffer ./jenkins.py ../ansible_hosts 'groovy ../spec/groovy/get-jobs-details.groovy' -i ~/.ssh/builduser --pattern aws-jenkins,gs-jenkins --no-headers | tee jenkins-jobs-no-headers.log
+~~~
+
+#### Run, skip errors
+
+~~~
+unbuffer ./jenkins.py ../ansible_hosts 'groovy ../spec/groovy/get-jobs-details.groovy' -i ~/.ssh/builduser --pattern aws-jenkins,gs-jenkins --no-headers --skip-errors | tee jenkins-jobs-no-headers-skip-errors.log
+~~~
+
+
 ## Run, log
 
 ~~~

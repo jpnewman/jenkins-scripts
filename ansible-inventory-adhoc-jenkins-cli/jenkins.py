@@ -24,6 +24,7 @@ DEFAULT_UNWANTED_SSH_LINES = [
 ]
 
 DEBUG = False
+SKIP_ERRORS = False
 
 
 class Command():
@@ -56,15 +57,22 @@ class Command():
 
 
 def debug(msg):
+    """Print debug message."""
     if DEBUG:
         print(msg)
+
+def error(msg):
+    """Print error message."""
+    if not SKIP_ERRORS:
+        print("ERROR: {0}".format(msg))
 
 
 def _parse_args():
     """Parse Command Arguments."""
     global DEBUG
+    global SKIP_ERRORS
 
-    desc = 'Jenkins Info, via Ansible'
+    desc = 'Jenkins, via Ansible'
     parser = argparse.ArgumentParser(description=desc)
 
     parser.add_argument('inventory_file',
@@ -85,7 +93,11 @@ def _parse_args():
                         action='store_true',
                         default=False,
                         help="Don't display headers")
-    parser.add_argument('-s', '--skip-errors',
+    parser.add_argument('-p', '--prefix-file',
+                        help="Prefix File")
+    parser.add_argument('-s', '--suffix-file',
+                        help="Suffix File")
+    parser.add_argument('-e', '--skip-errors',
                         action='store_true',
                         default=False,
                         help="Skip Errors")
@@ -95,7 +107,9 @@ def _parse_args():
                         help='Debug output')
 
     args = parser.parse_args()
+
     DEBUG = args.debug
+    SKIP_ERRORS = args.skip_errors
 
     return args
 
@@ -168,7 +182,7 @@ def get_jenkins_cli(host_name, port=80):
                     '--no-check-certificate']
 
     jenkins_cli = Command("wget {0} {1}".format(url, ' '.join(wget_options)))
-    if jenkins_cli.rc != 0:
+    if jenkins_cli.rc != 0 and not SKIP_ERRORS:
         raise Exception("ERROR: wget - {0}".format(jenkins_cli.stderr))
 
 
@@ -215,7 +229,11 @@ def run_jenkins_cli_command(jenkins_cli_path,
     debug(response.stdout)
     debug(response.stderr)
 
-    return "\n".join(response_lines)
+    response = ''
+    if response_lines:
+        response = "\n".join(response_lines)
+
+    return response
 
 
 def process_host(host_name, ssh_identity_file, jenkins_cli_command):
@@ -235,10 +253,11 @@ def process_host(host_name, ssh_identity_file, jenkins_cli_command):
                                        jenkins_cli_command,
                                        jar_options=jar_options)
 
-    print(response)
+    if response:
+        print(response)
 
 
-def process_hosts(hosts, jenkins_cli_command, ssh_identity_file, display_headers=True, skip_errors=False):
+def process_hosts(hosts, jenkins_cli_command, ssh_identity_file, display_headers=True):
     for host in hosts:
         host_name = host.get_name()
 
@@ -250,21 +269,39 @@ def process_hosts(hosts, jenkins_cli_command, ssh_identity_file, display_headers
         try:
             process_host(host_name, ssh_identity_file, jenkins_cli_command)
         except Exception, e:
-            print "{0}".format(str(e))
-            if not skip_errors:
-                raise
+            if not SKIP_ERRORS:
+                raise Exception("ERROR: {0}".format(str(e)))
+
+
+def output_file(input_file):
+    """Reads a files and outputs it contain to stdout."""
+
+    if (input_file):
+        if not os.path.isfile(input_file):
+            error("WARN: File not found: {0}".format(input_file))
+            return
+
+        with open(input_file, 'rb') as f:
+            print(f.read().strip())
 
 
 def main():
     """Main function."""
     args = _parse_args()
 
+    output_file(args.prefix_file)
+
     hosts = get_ansible_hosts(args.inventory_file, args.pattern)
 
     if not args.no_headers:
         display_hosts(hosts)
 
-    process_hosts(hosts, args.command, args.identity_file, not args.no_headers, args.skip_errors)
+    process_hosts(hosts,
+                  args.command,
+                  args.identity_file,
+                  not args.no_headers)
+
+    output_file(args.suffix_file)
 
 
 if __name__ == "__main__":
