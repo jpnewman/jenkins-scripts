@@ -1,0 +1,2 @@
+|Hostname|Notes|ipAddresses|Usage&nbsp;%|Region&nbsp;/&nbsp;Teams|Owner|Deploment&nbsp;Tools|Network&nbsp;Location|Number&nbsp;of&nbsp;Jobs|Latest&nbsp;Build&nbsp;Date|Agent&nbsp;Labels&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|Decommission Target Date|
+|---|---|---|---|---|---|---|---|---|---|---|---|
