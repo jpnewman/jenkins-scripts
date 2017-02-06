@@ -3,10 +3,11 @@ import jenkins.model.*
 import hudson.*
 import hudson.model.*
 
-import java.net.*;
-import java.util.*;
+import java.net.*
+import java.util.*
 
 import hudson.model.*
+import hudson.util.RemotingDiagnostics
 
 enum JenkinsType {
   MASTER,
@@ -41,10 +42,25 @@ class MasterDetail extends BaseDetail {
 
 def getInetAddresses(detail, hostname) {
   try {
-    String hostAddress = InetAddress.getAllByName(hostname).hostAddress
-    hostAddress = hostAddress.replaceAll('\\[', '').replaceAll('\\]', '')
-    detail.ipAddresses.add(hostAddress)
+    ArrayList hostAddresses = InetAddress.getAllByName(hostname).hostAddress
+    for (hostAddress in hostAddresses) {
+      detail.ipAddresses.add(hostAddress)
+    }
   } catch (java.net.UnknownHostException ex) {
+    detail.ipAddresses = []
+  }
+}
+
+def getRemoteInetAddress(detail, slave) {
+  script = "println(InetAddress.localHost.hostAddress)"
+  try {
+    String results = RemotingDiagnostics.executeGroovy(script, slave.getChannel())
+    ArrayList hostAddresses = results.replaceAll('\\[', '').replaceAll('\\]', '').trim().split(',')
+    for (hostAddress in hostAddresses) {
+      detail.ipAddresses.add(hostAddress)
+    }
+  } catch (all) {
+    // all.printStackTrace();
     detail.ipAddresses = []
   }
 }
@@ -111,7 +127,7 @@ def getSlaveDetails() {
     slaveDetail.type = JenkinsType.SLAVE
     slaveDetail.hostname = slave.name
 
-    getInetAddresses(slaveDetail, slave.name)
+    getRemoteInetAddress(slaveDetail, slave)
     getSlaveLabels(slaveDetail, slave)
 
     slaves.add(slaveDetail)
