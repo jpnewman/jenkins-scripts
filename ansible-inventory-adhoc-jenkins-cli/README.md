@@ -115,7 +115,7 @@ unbuffer ./jenkins.py ../ansible_hosts 'groovy ../spec/groovy/get-jobs-details.g
 unbuffer ./jenkins.py ansible_hosts --pattern jenkins-server | tee jenkins.log
 ~~~
 
-## Debug
+## Run, debug
 
 ~~~
 ./jenkins.py ansible_hosts --pattern jenkins-server --debug
