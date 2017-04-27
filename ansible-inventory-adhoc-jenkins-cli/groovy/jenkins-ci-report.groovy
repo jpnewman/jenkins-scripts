@@ -118,6 +118,8 @@ def getMasterDetails(details) {
   masterDetail.slaves = getSlaveDetails()
 
   details[masterDetail.hostname] = masterDetail
+
+  masterDetail.recoverySystem = getRecoverySystem()
 }
 
 def getSlaveDetails() {
@@ -134,6 +136,17 @@ def getSlaveDetails() {
   }
 
   return slaves
+}
+
+def getRecoverySystem() {
+  def scm_sync_config = hudson.model.Hudson.instance.pluginManager.getPlugin("scm-sync-configuration")
+
+  if (!scm_sync_config) {
+    return ''
+  }
+
+  def scm_sync_config_instance = hudson.plugins.scm_sync_configuration.ScmSyncConfigurationPlugin.getInstance()
+  recoverySystem = scm_sync_config_instance.getScmUrl()
 }
 
 def printDetailMarkdownTableHeader() {
@@ -170,8 +183,9 @@ def printDetailMarkdownTable(details) {
               '',
               '',
               sprintf('**%s**', masterDetail.value.totalJobs ?: ''),
-              sprintf('**%s**', masterDetail.value.lastBuild ? masterDetail.value.lastBuild.format("YYYY-MM-DD") : ''),
+              sprintf('**%s**', masterDetail.value.lastBuild ? masterDetail.value.lastBuild.format("YYYY-MM-dd") : ''),
               '',
+              sprintf('%s', masterDetail.value.recoverySystem ? sprintf('**```%s```**', masterDetail.value.recoverySystem) : ''),
               '']
     println("|${columns.join('|')}|")
 
@@ -187,6 +201,7 @@ def printDetailMarkdownTable(details) {
                 '',
                 '',
                 sprintf("%s", slaveDetail.slaveLabals.collect { "```$it```" }.join('<br />')),
+                '',
                 '']
       println("|${columns.join('|')}|")
     }
